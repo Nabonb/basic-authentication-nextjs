@@ -1,95 +1,88 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+
+import { useAuth } from "../context/AuthContext"; // Custom hook for authentication context
+import { useRouter } from "next/navigation"; // For programmatic navigation in Next.js
+import {
+  Box,
+  Button,
+  Text,
+  Heading,
+  VStack,
+  Flex,
+  Avatar,
+  useToast,
+} from "@chakra-ui/react"; // Chakra UI components
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const { user, logout } = useAuth(); // Access user and logout function from authentication context
+  const router = useRouter(); // Router instance for navigation
+  const toast = useToast(); // Chakra UI toast for showing notifications
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  // Handle user logout
+  const handleLogout = async () => {
+    await logout(); // Call logout function from auth context
+
+    // Display success toast notification after logout
+    toast({
+      title: "Logged out successfully!",
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    });
+
+    // Redirect user to the login page after logout
+    router.push("/login");
+  };
+
+  // Redirect to login page if no user is authenticated
+  if (!user) {
+    router.push("/login");
+    return null; // Return null to prevent rendering the rest of the component
+  }
+
+  return (
+    <Flex
+      minH="100vh" // Full viewport height
+      align="center" // Vertically center the content
+      justify="center" // Horizontally center the content
+      bg="gray.50" // Light background color
+      px={4}
+      py={6}
+    >
+      <Box
+        maxW="lg" // Maximum width of the container
+        bg="white" // White background for the box
+        p={8} // Padding inside the box
+        rounded="lg" // Rounded corners
+        shadow="lg" // Large shadow for depth effect
+        textAlign="center" // Center text inside the box
+      >
+        <VStack spacing={4}>
+          {/* Display user avatar, using email as fallback name */}
+          <Avatar size="xl" name={user?.email} bg="teal.500" color="white" />
+
+          {/* Heading with a welcome message, displaying the user's email */}
+          <Heading as="h2" fontSize="2xl" color="teal.500">
+            Welcome, {user?.email}
+          </Heading>
+
+          {/* Subtext showing successful login message */}
+          <Text fontSize="md" color="gray.600">
+            You are successfully logged in.
+          </Text>
+
+          {/* Logout button to handle user logout */}
+          <Button
+            colorScheme="teal"
+            size="lg"
+            mt={4}
+            onClick={handleLogout}
+            shadow="md"
           >
-            <Image
-              className={styles.logo}
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            Logout
+          </Button>
+        </VStack>
+      </Box>
+    </Flex>
   );
 }
